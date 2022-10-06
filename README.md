@@ -189,7 +189,8 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
 ```
 
 ### Known Issues
-- There was one but I can't remember what it was
+- There was one but I can't remember what it was (its not the one below)
+- Fields in the panel changed by dependsOn do not resolve properly when saving one set, editing that resource, swapping to the other set, and back again. Fix is known but its late, thats a future me problem. 
 
 
 ## License

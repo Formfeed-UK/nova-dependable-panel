@@ -289,7 +289,6 @@ export default {
     },
     dependsOnGroups() {
       let groupedDependsOn = {};
-      this.watchedFields = [];
       each(this.currentFields, (field) => {
         if (field.dependsOnGroups) {
           each(field.dependsOnGroups, (defaultValue, dependsOn) => {

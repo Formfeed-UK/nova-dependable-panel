@@ -150,7 +150,7 @@ class DependablePanel extends Field {
     }
 
     public function fields(array $fields) {
-        $this->fields = $fields;
+        $this->fields =  new FieldCollection($fields);
         return $this;
     }
 

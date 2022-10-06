@@ -159,6 +159,35 @@ This panel will use the first argument to DependablePanel as its panel name.
     }
 ```
 
+#### Changing the fields in the Panel as a result of dependsOn 
+Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves.
+
+```php
+    use FormFeed\NovaDependablePanel\DependablePanel;
+
+    public function fields(Request $request)
+    {
+        return [
+            Select::make('Select', 'select')->options([
+                'option1' => 'Option 1',
+                'option2' => 'Option 2',
+            ]),
+            DependablePanel::make('Panel Title', [
+                Text::make('Field 1'),
+                Text::make('Field 2'),
+            ])
+            ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                if ($formData['select'] == "option1") {
+                    $field->fields([
+                        Text::make('Field 3'),
+                        Text::make('Field 4'),
+                    ]);
+                }
+            }),
+        ];
+    }
+```
+
 ### Known Issues
 - There was one but I can't remember what it was
 

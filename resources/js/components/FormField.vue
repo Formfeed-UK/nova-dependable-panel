@@ -35,15 +35,8 @@ import { DependentFormField, mapProps } from "laravel-nova";
 import { Errors } from "form-backend-validation";
 
 import each from "lodash/each";
-import tap from "lodash/tap";
-import debounce from "lodash/debounce";
-import throttle from "lodash/throttle";
-import forIn from "lodash/forIn";
-import get from "lodash/get";
-import identity from "lodash/identity";
 import isEmpty from "lodash/isEmpty";
 import isNil from "lodash/isNil";
-import pickBy from "lodash/pickBy";
 import cloneDeep from "lodash/cloneDeep";
 
 export default {
@@ -133,7 +126,6 @@ export default {
   mounted() {
     this.initGroupedDependsOn();
     this.watchFields();
-    this.watchErrors();
     if (this.isInFlexibleGroup) {
       this.watchKeys();
     }
@@ -142,14 +134,16 @@ export default {
   updated() {
     this.watchFields();
     this.setFieldValues();
+    this.removeEventWatchers();
+    this.initGroupedDependsOn();
     this.$emit(
-              this.visible === true
-                ? 'field-shown'
-                : 'field-hidden',
-              this.field.attribute
-            )
+      this.visible === true ? "field-shown" : "field-hidden",
+      this.field.attribute
+    );
+  },
 
-    console.log("new", this);
+  beforeUnmount() {
+    this.removeEventWatchers();
   },
 
   methods: {
@@ -158,6 +152,17 @@ export default {
      */
     setInitialValue() {
       this.value = this.field.value || "";
+    },
+
+    removeEventWatchers() {
+      if (!isEmpty(this.watchedEvents)) {
+        forIn(this.watchedEvents, (event, dependsOn) => {
+          Nova.$off(
+            this.getFieldAttributeChangeEventName(event.dependsOn),
+            event
+          );
+        });
+      }
     },
 
     /**
@@ -173,18 +178,6 @@ export default {
         }
         formData.append("_dependent_field", true);
       }
-    },
-
-    watchErrors() {
-      this.$watch('errors', (newErrors) => {
-        if (newErrors.errors) {
-          Object.entries(newErrors.errors).forEach(error => {
-            if (error[0] && this.currentField.fields.find(x => x.attribute === error[0])) {
-              console.log(this.tabSlug);
-            }
-          });
-        }
-      });
     },
 
     fieldInstances() {
@@ -239,23 +232,24 @@ export default {
         );
       }
     },
-    
+
     watchKeys() {
       this.$watch(
         () => this.currentField.validationKey,
         (value) => {
-          if (this.syncedField) this.syncedField.validationKey = this.field.validationKey;
+          if (this.syncedField)
+            this.syncedField.validationKey = this.field.validationKey;
         }
       );
 
       this.$watch(
         () => this.currentField.uniqueKey,
         (value) => {
-          if (this.syncedField) this.syncedField.uniqueKey = this.field.uniqueKey;
+          if (this.syncedField)
+            this.syncedField.uniqueKey = this.field.uniqueKey;
         }
       );
     },
-    
 
     setFieldValues() {
       if (!this.syncedField) {
@@ -290,17 +284,12 @@ export default {
           field.uniqueKey = `${this.groupKey}-${field.uniqueKey}`;
         }
         this.setFieldDependentGroup(field);
-
-        /*if (instances[field.attribute]) {
-          forIn(instances[field.attribute].watchedEvents, (event, dependsOn) => {
-          });
-          //instances[field.attribute].currentField.visible = this.currentField.visible;
-        }*/
       });
       return fields;
     },
     dependsOnGroups() {
       let groupedDependsOn = {};
+      this.watchedFields = [];
       each(this.currentFields, (field) => {
         if (field.dependsOnGroups) {
           each(field.dependsOnGroups, (defaultValue, dependsOn) => {
@@ -318,11 +307,14 @@ export default {
       return this.fieldInstances();
     },
     visibleFields() {
-      let fields = this.currentFields;
-      return fields.filter((field) => field.visible);
+      return this.currentFields.filter((field) => field.visible);
     },
     visible() {
-      return !(!this.currentField.visible || this.currentFields.length === 0 || this.visibleFields.length === 0);
+      return !(
+        !this.currentField.visible ||
+        this.currentFields.length === 0 ||
+        this.visibleFields.length === 0
+      );
     },
     groupKey() {
       if (this.currentField.validationKey.includes("__")) {
@@ -338,8 +330,12 @@ export default {
       return false;
     },
     isInFlexibleGroup() {
-      return ((this.groupKey !== false && this.uniquePrefix !== false) && this.groupKey == this.uniquePrefix);
-    }
+      return (
+        this.groupKey !== false &&
+        this.uniquePrefix !== false &&
+        this.groupKey == this.uniquePrefix
+      );
+    },
   },
 };
 </script>

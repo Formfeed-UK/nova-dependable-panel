@@ -1,9 +1,11 @@
 {
-    "name": "formfeed/nova-dependable-panel",
-    "description": "A Laravel Nova field.",
+    "name": "formfeed-uk/nova-dependable-panel",
+    "description": "A Laravel Nova Field acting as a Panel for grouped dependsOn functionality",
     "keywords": [
         "laravel",
-        "nova"
+        "nova",
+        "panel",
+        "dependsOn"
     ],
     "license": "MIT",
     "require": {

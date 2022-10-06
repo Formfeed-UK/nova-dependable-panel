@@ -195,6 +195,6 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
 
 ## License
 
-Nova Logo Url is open-sourced software licensed under the [MIT license](LICENSE.md).
+Nova Dependable Panel is open-sourced software licensed under the [MIT license](LICENSE.md).
 
 

@@ -10,7 +10,7 @@ mix
   .css('resources/css/field.css', 'css')
   .alias({
     '#': path.join(__dirname, 'resources/js/'),
-    //'@': path.join(__dirname, 'vendor/laravel/nova/resources/js')
-    '@': path.join(__dirname, '../../vendor/laravel/nova/resources/js')
+    '@': path.join(__dirname, 'vendor/laravel/nova/resources/js')
+    //'@': path.join(__dirname, '../../vendor/laravel/nova/resources/js')
   })
-  .nova('formfeed/nova-dependable-panel')
+  .nova('formfeed-uk/nova-dependable-panel')

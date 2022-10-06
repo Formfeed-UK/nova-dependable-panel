@@ -7,6 +7,7 @@ use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
 
 use Formfeed\DependablePanel\Http\Middleware\InterceptDependentFields;
+use Formfeed\DependablePanel\Http\Middleware\InterceptDisplayFields;
 use Formfeed\DependablePanel\Http\Middleware\InterceptValidationFailure;
 
 class FieldServiceProvider extends ServiceProvider
@@ -44,6 +45,7 @@ class FieldServiceProvider extends ServiceProvider
         if ($router->hasMiddlewareGroup('nova')) {
             $router->pushMiddlewareToGroup('nova', InterceptDependentFields::class);
             $router->pushMiddlewareToGroup('nova', InterceptValidationFailure::class);
+            $router->pushMiddlewareToGroup('nova', InterceptDisplayFields::class);
             return;
         }
         
@@ -51,7 +53,8 @@ class FieldServiceProvider extends ServiceProvider
             config()->set('nova.middleware', array_merge(
                 config('nova.middleware', []),
                 [InterceptDependentFields::class,
-                InterceptValidationFailure::class]
+                InterceptValidationFailure::class,
+                InterceptDisplayFields::class]
             ));
         }
     }

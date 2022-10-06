@@ -151,6 +151,7 @@ class DependablePanel extends Field {
 
     public function fields(array $fields) {
         $this->fields =  new FieldCollection($fields);
+        $this->fields->resolve($this->resource);
         return $this;
     }
 

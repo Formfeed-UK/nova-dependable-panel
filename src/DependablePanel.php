@@ -5,17 +5,19 @@ namespace Formfeed\DependablePanel;
 use Formfeed\NovaFlexibleContent\Http\FlexibleAttribute;
 use Formfeed\NovaFlexibleContent\Http\ScopedRequest;
 use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
 
+
+use Laravel\Nova\Contracts\ListableField;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Fields\FormData;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\SupportsDependentFields;
 use Laravel\Nova\Http\Controllers\ResourcePreviewController;
 use Laravel\Nova\Panel;
-
-use PhpParser\Node\Expr\BinaryOp\BooleanAnd;
+use Laravel\Nova\ResourceTool;
+use Laravel\Nova\ResourceToolElement;
 
 class DependablePanel extends Field {
     use SupportsDependentFields;
@@ -47,6 +49,7 @@ class DependablePanel extends Field {
      * @return void
      */
     public function __construct($name, array $fields = []) {
+
         $this->name = $name;
         $this->default(null);
         $this->attribute = str_replace(' ', '_', Str::lower($name));
@@ -150,8 +153,10 @@ class DependablePanel extends Field {
     }
 
     public function fields(array $fields) {
+        $request = app(NovaRequest::class);
+        $resource = $request->newResourceWith($request->findModel());
         $this->fields =  new FieldCollection($fields);
-        $this->fields->resolve($this->resource);
+        $this->fields->resolve($resource);
         return $this;
     }
 

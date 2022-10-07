@@ -16,6 +16,8 @@ This [Laravel Nova](https://nova.laravel.com/) package adds Panels that allow gr
 - Works with the fork of Nova Flexible Content allowing for dependsOn fields within Layout Groups
 - Fields can be added to an existing panel or seperated into a new one
 
+Note that this package is an extension of a Field, rather than a Panel, however it can act as a panel when the `separatePanel` method is used. This is to allow more flexibility to use fields as part of an existing Panel. 
+
 ## Installation
 
 Install the package in to a Laravel app that uses [Nova](https://nova.laravel.com) via composer:

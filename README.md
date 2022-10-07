@@ -33,7 +33,7 @@ composer require formfeed-uk/nova-dependable-panel
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
             Select::make('Select', 'select')->options([
@@ -44,9 +44,9 @@ composer require formfeed-uk/nova-dependable-panel
                 Text::make('Field 1'),
                 Text::make('Field 2'),
             ])
-            ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+            ->dependsOn(["select"], function (DependablePanel $panel, NovaRequest $request, FormData $formData) {
                 if ($formData['select'] == "option1") {
-                    $field->hide();
+                    $panel->hide();
                 }
             }),
         ];
@@ -59,7 +59,7 @@ All of the Text Fields dependsOn requests will be sent as one request using the 
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
             DependablePanel::make('Panel Title', [
@@ -68,27 +68,27 @@ All of the Text Fields dependsOn requests will be sent as one request using the 
                     'option2' => 'Option 2',
                 ]),
                 Text::make('Hide Field 1')
-                    ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                    ->dependsOn(["select"], function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData['select'] == "option1") {
                             $field->hide();
                         }
                     }),
                 Text::make('Hide Field 2')
-                    ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                    ->dependsOn(["select"], function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData['select'] == "option1") {
                             $field->hide();
                         }
                     }),
                 Text::make('Show Field 3')
                     ->hide()
-                    ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                    ->dependsOn(["select"], function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData['select'] == "option1") {
                             $field->show();
                         }
                     }),
                 Text::make('Show Field 4')
                     ->hide()
-                    ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                    ->dependsOn(["select"], function (Text $field, NovaRequest $request, FormData $formData) {
                         if ($formData['select'] == "option1") {
                             $field->show();
                         }
@@ -102,10 +102,12 @@ All of the Text Fields dependsOn requests will be sent as one request using the 
 #### Batching dependsOn functionality for all contained fields
 You can also batch dependsOn functionality for all fields within your Panel using the `applyToFields` method. For example if you need all fields to become readOnly. This can be overidden at the Field Level.
 
+Note that the first parameter should be of type `Field` to ensure that the function can apply to all fields within your panel, regardless of type. 
+
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
             DependablePanel::make('Panel Title', [
@@ -116,14 +118,14 @@ You can also batch dependsOn functionality for all fields within your Panel usin
                 Text::make('Field 1'),
                 Text::make('Field 2'),
                 Text::make('Field 3')
-                ->dependsOn(['select'], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+                ->dependsOn(['select'], function (Text $field, NovaRequest $request, FormData $formData) {
                     if ($formData['select'] == "option1") {
                         $field->readOnly(false);
                     }
                 })
             ])
-            ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
-                $field->applyToFields(function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+            ->dependsOn(["select"], function (DependablePanel $panel, NovaRequest $request, FormData $formData) {
+                $panel->applyToFields(function (Field $field, NovaRequest $request, FormData $formData) {
                     if ($formData['select'] == "option1") {
                         $field->readOnly();
                     }
@@ -141,7 +143,7 @@ This panel will use the first argument to DependablePanel as its panel name.
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
             DependablePanel::make('Panel Title', [
@@ -153,19 +155,18 @@ This panel will use the first argument to DependablePanel as its panel name.
                 Text::make('Field 2'),
                 Text::make('Field 3')
             ])
-            ->separatePanel(true)
-            
+            ->separatePanel(true)   
         ];
     }
 ```
 
 #### Changing the fields in the Panel as a result of dependsOn 
-Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves.
+Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves using the `fields` method.
 
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
             Select::make('Select', 'select')->options([
@@ -176,9 +177,9 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
                 Text::make('Field 1'),
                 Text::make('Field 2'),
             ])
-            ->dependsOn(["select"], function (Fields\Field $field, NovaRequest $request, Fields\FormData $formData) {
+            ->dependsOn(["select"], function (DependablePanel $panel, NovaRequest $request, FormData $formData) {
                 if ($formData['select'] == "option1") {
-                    $field->fields([
+                    $panel->fields([
                         Text::make('Field 3'),
                         Text::make('Field 4'),
                     ]);
@@ -188,10 +189,9 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
     }
 ```
 
-### Known Issues
-- There was one but I can't remember what it was (its not the one below)
-- Fields in the panel changed by dependsOn do not resolve properly when saving one set, editing that resource, swapping to the other set, and back again. Fix is known but its late, thats a future me problem. 
-
+## Known Issues
+- Panels cannot be seperated/combined in the dependsOn function, this can only be set once upon page load
+- Using `singleRequest` with a chain of dependsOn (ie Field A sets Value 1 in Field B which is depended upon by Field C) has inconsistent behaviour. Where you chain effects it is recommended that `singleRequest` is not used.
 
 ## License
 

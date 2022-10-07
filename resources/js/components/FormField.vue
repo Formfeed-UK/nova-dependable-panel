@@ -225,6 +225,7 @@ export default {
 
     watchFields() {
       for (const field in this.fieldInstances()) {
+        this.values[field] = (this.fieldInstances()[field]?.value) ? this.fieldInstances()[field]?.value : this.values[field] ?? null;
         this.$watch(
           () => this.fieldInstances()[field]?.value,
           (value) => {

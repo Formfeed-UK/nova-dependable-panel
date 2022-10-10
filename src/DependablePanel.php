@@ -143,9 +143,14 @@ class DependablePanel extends Field {
         $this->value = null;
         $this->defaultCallback = null;
         parent::applyDependsOn($request);
+        $fieldDependencies = $this->getDependentsAttributes($request) ?? [];
         if ($this->singleRequest) {
             foreach ($this->fields as $field) {
                 $field->default(null);
+                $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
+                if ($request->has("_changedField") && !in_array($request->input("_changedField"), array_keys($dependsOnArray)) && !in_array($request->input("_changedField"), array_keys($fieldDependencies))) {
+                    continue;
+                }
                 $field->applyDependsOn($request);
             }
         }

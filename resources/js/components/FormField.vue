@@ -191,6 +191,7 @@ export default {
 
     onSyncedField() {
       this.initGroupedDependsOn();
+      delete this.watchedFields["_changedField"];
       for (const field of this.currentField.fields) {
         field.value =
           this.values.hasOwnProperty(field.attribute) &&
@@ -211,6 +212,7 @@ export default {
           this.watchedEvents[dependsOn] = (value) => {
             this.watchedFields[dependsOn] = value;
             this.dependentFieldDebouncer(() => {
+              this.watchedFields["_changedField"] = dependsOn;
               this.watchedFields[dependsOn] = value;
               this.syncField();
             });

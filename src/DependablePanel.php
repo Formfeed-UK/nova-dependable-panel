@@ -147,6 +147,7 @@ class DependablePanel extends Field {
         if ($this->singleRequest) {
             foreach ($this->fields as $field) {
                 $field->default(null);
+                $field->value = null;
                 $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
                 if ($request->has("_changedField") && !in_array($request->input("_changedField"), array_keys($dependsOnArray)) && !in_array($request->input("_changedField"), array_keys($fieldDependencies))) {
                     continue;

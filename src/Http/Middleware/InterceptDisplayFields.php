@@ -48,13 +48,13 @@ class InterceptDisplayFields {
     }
 
     protected function handlePreview($data) {
-        //dump($data);
-
         foreach ($data->resource->fields as $fieldKey => $field) {
             if (isset($field->component) && $field->component === 'nova-dependable-panel') {
                 $data->resource->fields = [...$data->resource->fields, ...$field->fields];
-                unset($data->resource->fields[$fieldKey]);
             }
+            $data->resource->fields = array_filter($data->resource->fields, function ($field) {
+                return $field->component !== 'nova-dependable-panel';
+            });
         }
         return $data;
     }
@@ -64,16 +64,20 @@ class InterceptDisplayFields {
             foreach ($panel->fields as $fieldKey => $field) {
                 if (isset($field->component) && $field->component === 'nova-dependable-panel') {
                     $panel->fields = [...$panel->fields, ...$field->fields];
-                    unset($panel->fields[$fieldKey]);
                 }
             }
+            $panel->fields = array_filter($panel->fields, function ($field) {
+                return $field->component !== 'nova-dependable-panel';
+            });
         }
 
         foreach ($data->resource->fields as $fieldKey => $field) {
             if (isset($field->component) && $field->component === 'nova-dependable-panel') {
                 $data->resource->fields = [...$data->resource->fields, ...$field->fields];
-                unset($data->resource->fields[$fieldKey]);
             }
+            $data->resource->fields = array_filter($data->resource->fields, function ($field) {
+                return $field->component !== 'nova-dependable-panel';
+            });
         }
 
         return $data;
@@ -84,9 +88,11 @@ class InterceptDisplayFields {
             foreach ($resource->fields as $fieldKey => $field) {
                 if (isset($field->component) && $field->component === 'nova-dependable-panel') {
                     $resource->fields = [...$resource->fields, ...$field->fields];
-                    unset($resource->fields[$fieldKey]);
                 }
             }
+            $resource->fields = array_filter($resource->fields, function ($field) {
+                return $field->component !== 'nova-dependable-panel';
+            });
         }
         return $data;
     }

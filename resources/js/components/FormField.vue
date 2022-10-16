@@ -300,7 +300,7 @@ export default {
               groupedDependsOn[dependsOn] = [];
             }
             groupedDependsOn[dependsOn].push(field.attribute);
-            this.watchedFields[dependsOn] = defaultValue;
+            if (!isNil(defaultValue)) this.watchedFields[dependsOn] = defaultValue;
           });
         }
       });

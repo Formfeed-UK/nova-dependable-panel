@@ -82,8 +82,6 @@ class DependablePanel extends Field {
         foreach ($this->fields as $field) {
             $field->resolve($resource, null);
         }
-
-        $this->fields->applyDependsOnWithDefaultValues(NovaRequest::createFrom(request()));
     }
 
     public function getUpdateRules(NovaRequest $request) {
@@ -163,6 +161,7 @@ class DependablePanel extends Field {
         $resource = $request->newResourceWith($request->findModel());
         $this->fields =  new FieldCollection($fields);
         $this->fields->resolve($resource);
+        $this->fields->applyDependsOnWithDefaultValues(NovaRequest::createFrom(request()));
         return $this;
     }
 

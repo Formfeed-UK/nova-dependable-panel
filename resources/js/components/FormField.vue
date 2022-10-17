@@ -125,6 +125,7 @@ export default {
   },
 
   mounted() {
+    this.setFieldValues();
     this.initGroupedDependsOn();
     this.watchFields();
     if (this.isInFlexibleGroup) {
@@ -227,7 +228,6 @@ export default {
 
     watchFields() {
       for (const field in this.fieldInstances()) {
-        this.values[field] = (this.fieldInstances()[field]?.value) ? this.fieldInstances()[field]?.value : this.values[field] ?? null;
         this.$watch(
           () => this.fieldInstances()[field]?.value,
           (value) => {
@@ -256,13 +256,13 @@ export default {
     },
 
     setFieldValues() {
-      if (!this.syncedField) {
-        return;
-      }
-      for (const field of this.syncedField.fields) {
+      for (const field of this.currentField.fields) {
         const currField = this.fieldInstances()[field.attribute];
         if (!isNil(field.value)) {
-          currField.setInitialValue();
+          this.values[field.attribute] = field.value;
+          if (!isNil(currField)) {
+            currField.setInitialValue();
+          }
         }
       }
     },
@@ -300,7 +300,8 @@ export default {
               groupedDependsOn[dependsOn] = [];
             }
             groupedDependsOn[dependsOn].push(field.attribute);
-            if (!isNil(defaultValue)) this.watchedFields[dependsOn] = defaultValue;
+            if (!isNil(defaultValue))
+              this.watchedFields[dependsOn] = defaultValue;
           });
         }
       });

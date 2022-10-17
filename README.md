@@ -1,6 +1,9 @@
 # Nova 4 Dependable Panel
 
 This [Laravel Nova](https://nova.laravel.com/) package adds Panels that allow grouped dependsOn functionality
+
+#### Note: Currently Seeing a number of edge cases that are causing issues, for now it's not recommended to use this package in production until it gets a 1.x*
+
 ## Requirements
 
 - `php: ^7.3|^8.0`
@@ -25,6 +28,7 @@ Install the package in to a Laravel app that uses [Nova](https://nova.laravel.co
 ```bash
 composer require formfeed-uk/nova-dependable-panel
 ```
+#### Note: Currently Seeing a number of edge cases that are causing issues, for now it's not recommended to use this package in production until it gets a 1.x*
 
 ## Usage
 

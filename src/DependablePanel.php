@@ -130,8 +130,12 @@ class DependablePanel extends Field {
     public function applyDependsOn(NovaRequest $request) {
         parent::applyDependsOn($request);
         if ($this->singleRequest) {
-            foreach ($this->fields as $field) {
-                $field->applyDependsOn($request);
+            if (!$request->isMethod("PATCH") && ($request->isCreateOrAttachRequest() || $request->isUpdateOrUpdateAttachedRequest())) {
+                $this->fields->applyDependsOnWithDefaultValues($request);
+            } else {
+                foreach ($this->fields as $field) {
+                    $field->applyDependsOn($request);
+                }
             }
         }
         return $this;
@@ -147,9 +151,6 @@ class DependablePanel extends Field {
                 $field->default(null);
                 $field->value = null;
                 $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
-                if ($request->has("_changedField") && !in_array($request->input("_changedField"), array_keys($dependsOnArray)) && !in_array($request->input("_changedField"), array_keys($fieldDependencies))) {
-                    continue;
-                }
                 $field->applyDependsOn($request);
             }
         }

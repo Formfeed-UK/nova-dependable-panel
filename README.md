@@ -198,6 +198,14 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
 ## Known Issues
 - Panels cannot be seperated/combined in the dependsOn function, this can only be set once upon page load
 - Using `singleRequest` with a chain of dependsOn (ie Field A sets Value 1 in Field B which is depended upon by Field C) has inconsistent behaviour. Where you chain effects it is recommended that `singleRequest` is not used.
+- Nova's Boolean field doesn't behave as expected due to its value being set to false when it is null, this means that Boolean fields altered by the dependable panel will be false, which isn't great UX. It's recommended to extend the Boolean field within your project and perform the following override:
+
+```php
+    protected function resolveDefaultValue(NovaRequest $request)
+    {
+        return Field::resolveDefaultValue($request);
+    }
+```
 
 ## License
 

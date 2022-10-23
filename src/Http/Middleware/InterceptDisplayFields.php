@@ -48,42 +48,51 @@ class InterceptDisplayFields {
     }
 
     protected function handlePreview($data) {
-        foreach ($data->resource->fields as $fieldKey => $field) {
-            if (isset($field->component) && $field->component === 'nova-dependable-panel') {
-                $data->resource->fields = [...$data->resource->fields, ...$field->fields];
+        if (isset($data->resource?->fields)) {
+            foreach ($data->resource->fields as $fieldKey => $field) {
+                if (isset($field->component) && $field->component === 'nova-dependable-panel') {
+                    $data->resource->fields = [...$data->resource->fields, ...$field->fields];
+                }
+                $data->resource->fields = array_filter($data->resource->fields, function ($field) {
+                    return $field->component !== 'nova-dependable-panel';
+                });
             }
-            $data->resource->fields = array_filter($data->resource->fields, function ($field) {
-                return $field->component !== 'nova-dependable-panel';
-            });
         }
         return $data;
     }
 
     protected function handleDetail($data) {
-        foreach ($data->panels as $panelKey => $panel) {
-            foreach ($panel->fields as $fieldKey => $field) {
-                if (isset($field->component) && $field->component === 'nova-dependable-panel') {
-                    $panel->fields = [...$panel->fields, ...$field->fields];
+        if (isset($data->panels)) {
+            foreach ($data->panels as $panelKey => $panel) {
+                foreach ($panel->fields as $fieldKey => $field) {
+                    if (isset($field->component) && $field->component === 'nova-dependable-panel') {
+                        $panel->fields = [...$panel->fields, ...$field->fields];
+                    }
                 }
+                $panel->fields = array_filter($panel->fields, function ($field) {
+                    return $field->component !== 'nova-dependable-panel';
+                });
             }
-            $panel->fields = array_filter($panel->fields, function ($field) {
-                return $field->component !== 'nova-dependable-panel';
-            });
         }
 
-        foreach ($data->resource->fields as $fieldKey => $field) {
-            if (isset($field->component) && $field->component === 'nova-dependable-panel') {
-                $data->resource->fields = [...$data->resource->fields, ...$field->fields];
+        if (isset($data->resource?->fields)) {
+            foreach ($data->resource->fields as $fieldKey => $field) {
+                if (isset($field->component) && $field->component === 'nova-dependable-panel') {
+                    $data->resource->fields = [...$data->resource->fields, ...$field->fields];
+                }
+                $data->resource->fields = array_filter($data->resource->fields, function ($field) {
+                    return $field->component !== 'nova-dependable-panel';
+                });
             }
-            $data->resource->fields = array_filter($data->resource->fields, function ($field) {
-                return $field->component !== 'nova-dependable-panel';
-            });
         }
 
         return $data;
     }
 
     protected function handleIndex($data) {
+        if (!isset($data->resources)) {
+            return $data;
+        }
         foreach ($data->resources as $resourceKey => $resource) {
             foreach ($resource->fields as $fieldKey => $field) {
                 if (isset($field->component) && $field->component === 'nova-dependable-panel') {

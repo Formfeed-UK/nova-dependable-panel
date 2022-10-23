@@ -4,7 +4,7 @@ let path = require('path')
 require('./nova.mix')
 
 let aliasMerge = {};
-if (__dirname.includes("nova-components")) {
+if (__dirname.includes("nova-components") || __dirname.includes("submodules")) {
     aliasMerge = {'@': path.join(__dirname, '../../vendor/laravel/nova/resources/js')};
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="divide-y divide-gray-100 dark:divide-gray-700" v-if="visible">
+  <div class="divide-y divide-gray-100 dark:divide-gray-700" v-show="visible">
     <component
       v-for="(field, index) in currentFields"
       :index="index"
@@ -52,6 +52,7 @@ export default {
 
   data: () => ({
     values: {},
+    visibleFieldsForPanel: {},
   }),
 
   props: {
@@ -124,10 +125,15 @@ export default {
     },
   },
 
+  created() {
+
+  },
+
   mounted() {
     this.setFieldValues();
     this.initGroupedDependsOn();
     this.watchFields();
+    this.initialFieldVisibility();
     if (this.isInFlexibleGroup) {
       this.watchKeys();
     }
@@ -138,10 +144,9 @@ export default {
     this.setFieldValues();
     this.removeEventWatchers();
     this.initGroupedDependsOn();
-    this.$emit(
-      this.visible === true ? "field-shown" : "field-hidden",
-      this.field.attribute
-    );
+    if (this.currentField.singleRequest) {
+        this.initialFieldVisibility();
+    }
   },
 
   beforeUnmount() {
@@ -154,6 +159,20 @@ export default {
      */
     setInitialValue() {
       this.value = this.field.value || "";
+    },
+
+    initialFieldVisibility() {
+        each(this.currentField.fields, field => {
+            this.visibleFieldsForPanel[field.attribute] = field.visible
+        })
+    },
+
+    handleFieldShown(field) {
+      this.visibleFieldsForPanel[field] = true
+    },
+
+    handleFieldHidden(field) {
+      this.visibleFieldsForPanel[field] = false
     },
 
     removeEventWatchers() {
@@ -310,15 +329,23 @@ export default {
     currentInstances() {
       return this.fieldInstances();
     },
-    visibleFields() {
-      return this.currentFields.filter((field) => field.visible);
+    visibleFieldsCount() {
+      return Object.values(this.visibleFieldsForPanel).filter((visible) => visible).length;
     },
     visible() {
-      return !(
+      let isVisible = !(
         !this.currentField.visible ||
-        this.currentFields.length === 0 ||
-        this.visibleFields.length === 0
+        this.visibleFieldsCount === 0 ||
+        this.currentFields.length === 0
       );
+
+      this.$emit(
+              isVisible === true
+                ? 'field-shown'
+                : 'field-hidden',
+              this.field.attribute
+            );
+      return isVisible;
     },
     groupKey() {
       if (this.currentField.validationKey.includes("__")) {

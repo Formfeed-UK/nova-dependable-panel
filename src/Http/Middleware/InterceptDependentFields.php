@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\UpdateFieldController;
 use Laravel\Nova\Http\Controllers\CreationFieldController;
+use Laravel\Nova\Http\Controllers\CreationFieldSyncController;
 use Laravel\Nova\Http\Controllers\UpdatePivotFieldController;
 use Laravel\Nova\Http\Controllers\CreationPivotFieldController;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -54,15 +55,7 @@ class InterceptDependentFields {
         if (!$request->isMethod("PATCH")) {
             return false;
         }
-        $routeController = $request->route()->getController();
-        if ($routeController && ($routeController instanceof UpdateFieldController ||
-            $routeController instanceof CreationFieldController ||
-            $routeController instanceof UpdatePivotFieldController ||
-            $routeController instanceof CreationPivotFieldController
-        )) {
-            return true;
-        }
-        return false;
+        return (is_null($this->getFieldMethod($request))) ? false : true;
     }
 
     protected function hasDependentPanelFields(Request $request) {
@@ -111,6 +104,7 @@ class InterceptDependentFields {
             case UpdatePivotFieldController::class:
                 return "updatePivotFields";
             case CreationFieldController::class:
+            case CreationFieldSyncController::class:
                 return "creationFields";
             case CreationPivotFieldController::class:
                 return "creationPivotFields";

@@ -144,16 +144,19 @@ class DependablePanel extends Field {
     public function syncDependsOn(NovaRequest $request) {
         $this->value = null;
         $this->defaultCallback = null;
+        // Using an ugly two loops as the value could be set via applyToFields in applyDependsOn
+        foreach ($this->fields as $field) {
+            $field->default(null);
+            $field->value = null;
+        }
         parent::applyDependsOn($request);
         $fieldDependencies = $this->getDependentsAttributes($request) ?? [];
-        if ($this->singleRequest) {
-            foreach ($this->fields as $field) {
-                $field->default(null);
-                $field->value = null;
-                $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
-                $field->applyDependsOn($request);
-            }
+
+        foreach ($this->fields as $field) {
+            $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
+            $field->applyDependsOn($request);
         }
+
         return $this;
     }
 
@@ -167,6 +170,7 @@ class DependablePanel extends Field {
     }
 
     public function getValidationAttributeNames(NovaRequest $request) {
+        $this->applyDependsOn($request);
         return array_merge(
             [$this->validationKey() => $this->name],
             $this->fields->mapWithKeys(function ($field) use ($request) {

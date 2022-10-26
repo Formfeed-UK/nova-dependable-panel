@@ -167,7 +167,7 @@ This panel will use the first argument to DependablePanel as its panel name.
 ```
 
 #### Changing the fields in the Panel as a result of dependsOn 
-Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves using the `fields` method.
+Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves using the `fields` method. Note that this functionality requires `singleRequest` to operate properly. 
 
 ```php
     use FormFeed\NovaDependablePanel\DependablePanel;
@@ -183,11 +183,54 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
                 Text::make('Field 1'),
                 Text::make('Field 2'),
             ])
+            ->singleRequest(true)
             ->dependsOn(["select"], function (DependablePanel $panel, NovaRequest $request, FormData $formData) {
                 if ($formData['select'] == "option1") {
                     $panel->fields([
                         Text::make('Field 3'),
                         Text::make('Field 4'),
+                    ]);
+                }
+            }),
+        ];
+    }
+```
+
+**Note: If the fields added via the `fields` method also have dependsOn defined, and you wish those dependsOn mixins to be applied correctly when those fields are first mounted, you should include the fields that they depend upon in the panels `dependsOn` function.**
+
+In the example below if the "Readonly" checkbox is checked, and then the select option is changed to Option 1, in order for these fields to be readonly when mounted, you can see "readonly" needs to be included in the panels `dependsOn` function.
+
+```php
+    use FormFeed\NovaDependablePanel\DependablePanel;
+
+    public function fields(NovaRequest $request)
+    {
+        return [
+            Select::make('Select', 'select')->options([
+                'option1' => 'Option 1',
+                'option2' => 'Option 2',
+            ]),
+            Boolean::make('Readonly'),
+            DependablePanel::make('Panel Title', [
+                Text::make('Field 1'),
+                Text::make('Field 2'),
+            ])
+            ->singleRequest(true)
+            ->dependsOn(["select", "readonly"], function (DependablePanel $panel, NovaRequest $request, FormData $formData) {
+                if ($formData['select'] == "option1") {
+                    $panel->fields([
+                        Text::make('Field 3')
+                            ->dependsOn(["readonly"], function (Text $field, NovaRequest $request, FormData $formData) {
+                                if ($formData['readonly']) {
+                                    $field->readonly();
+                                }
+                            }),
+                        Text::make('Field 4')
+                            ->dependsOn(["readonly"], function (Text $field, NovaRequest $request, FormData $formData) {
+                                if ($formData['readonly']) {
+                                    $field->readonly();
+                                }
+                            }),
                     ]);
                 }
             }),

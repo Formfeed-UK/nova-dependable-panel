@@ -141,7 +141,7 @@ export default {
 
   updated() {
     this.watchFields();
-    this.setFieldValues();
+    //this.setFieldValues();
     this.removeEventWatchers();
     this.initGroupedDependsOn();
     if (this.currentField.singleRequest) {
@@ -213,12 +213,15 @@ export default {
       this.initGroupedDependsOn();
       delete this.watchedFields["_changedField"];
       for (const field of this.currentField.fields) {
-        field.value =
-          this.values.hasOwnProperty(field.attribute) &&
-          (!this.fieldInstances().hasOwnProperty(field.attribute) ||
-            !this.fieldInstances()[field.attribute])
-            ? this.values[field.attribute]
-            : field.value;
+        if (this.fieldInstances().hasOwnProperty(field.attribute) && !isNil(this.fieldInstances()[field.attribute])) {
+            let instance = this.fieldInstances()[field.attribute];
+            field.value = isNil(field.value) ? this.values[field.attribute] ?? field.defaultValue ?? instance.currentField.value : field.value;
+            instance.syncedField = field;
+            instance.setInitialValue();
+        }
+        else {
+            field.value = isNil(field.value) ? this.values[field.attribute] ?? field.defaultValue ?? field.value ?? null : field.value;
+        }
       }
     },
 
@@ -277,6 +280,11 @@ export default {
     setFieldValues() {
       for (const field of this.currentField.fields) {
         const currField = this.fieldInstances()[field.attribute];
+
+        if (isNil(field.value) && !isNil(field.defaultValue)) {
+            field.value = field.defaultValue;
+        }
+
         if (!isNil(field.value)) {
           this.values[field.attribute] = field.value;
           if (!isNil(currField)) {

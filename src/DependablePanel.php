@@ -165,6 +165,13 @@ class DependablePanel extends Field {
         $resource = $request->newResourceWith($request->findModel());
         $this->fields =  new FieldCollection($fields);
         $this->fields->resolve($resource);
+        $this->fields->each(function ($field) use ($request) {
+            if (is_null($field->value)) {
+                $serialize = $field->jsonSerialize();
+                $field->withMeta(["defaultValue" => $serialize['value']]);
+                $field->default(null);
+            }
+        });
         $this->fields->applyDependsOnWithDefaultValues(NovaRequest::createFrom(request()));
         return $this;
     }

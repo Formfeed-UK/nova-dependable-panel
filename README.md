@@ -240,7 +240,7 @@ In the example below if the "Readonly" checkbox is checked, and then the select 
 
 ## Known Issues
 - Panels cannot be seperated/combined in the dependsOn function, this can only be set once upon page load
-- Using `singleRequest` with a chain of dependsOn (ie Field A sets Value 1 in Field B which is depended upon by Field C) has inconsistent behaviour. Where you chain effects it is recommended that `singleRequest` is not used.
+- The Values of Differing sets of fields loaded by the `Fields` method in the Panels `dependsOn` will not persist changed values on the update form for fields where values are already stored in the database for that resource, when swapping between different resource sets.
 - Nova's Boolean field doesn't behave as expected due to its value being set to false when it is null, this means that Boolean fields altered by the dependable panel will be false, which isn't great UX. It's recommended to extend the Boolean field within your project and perform the following override:
 
 ```php

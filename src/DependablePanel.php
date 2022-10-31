@@ -129,7 +129,7 @@ class DependablePanel extends Field {
 
     public function applyDependsOn(NovaRequest $request) {
         parent::applyDependsOn($request);
-        if ($this->singleRequest || $request->isMethod("POST")) {
+        if ($this->singleRequest || !$request->isMethod("PATCH")) {
             if (!$request->isMethod("PATCH") && !$request->isMethod("POST") && ($request->isCreateOrAttachRequest() || $request->isUpdateOrUpdateAttachedRequest())) {
                 $this->fields->applyDependsOnWithDefaultValues($request);
             } else {

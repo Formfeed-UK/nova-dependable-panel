@@ -2,7 +2,7 @@
 
 This [Laravel Nova](https://nova.laravel.com/) package adds Panels that allow grouped dependsOn functionality
 
-#### Note: Currently Seeing a number of edge cases that are causing issues, for now it's not recommended to use this package in production until it gets a 1.x*
+Dusk Test Repo: https://github.com/Formfeed-UK/nova-dependable-panel-tests 
 
 ## Requirements
 
@@ -28,7 +28,6 @@ Install the package in to a Laravel app that uses [Nova](https://nova.laravel.co
 ```bash
 composer require formfeed-uk/nova-dependable-panel
 ```
-#### Note: Currently Seeing a number of edge cases that are causing issues, for now it's not recommended to use this package in production until it gets a 1.x*
 
 ## Usage
 
@@ -240,8 +239,8 @@ In the example below if the "Readonly" checkbox is checked, and then the select 
 
 ## Known Issues
 - Panels cannot be seperated/combined in the dependsOn function, this can only be set once upon page load
-- The Values of Differing sets of fields loaded by the `Fields` method in the Panels `dependsOn` will not persist changed values on the update form for fields where values are already stored in the database for that resource, when swapping between different resource sets.
-- Nova's Boolean field doesn't behave as expected due to its value being set to false when it is null, this means that Boolean fields altered by the dependable panel will be false, which isn't great UX. It's recommended to extend the Boolean field within your project and perform the following override:
+- When swapping between different sets of fields via the `Fields` method in the Panels `dependsOn` changed values will not persist on the update form for fields where values are already stored in the database for that resource.
+- Nova's Boolean field doesn't behave as expected due to its value being set to false when it is null, this means that Boolean fields altered by the dependable panel will be false, which isn't great UX. A middleware fix is incoming, but for now it's recommended to extend the Boolean field within your project and perform the following override:
 
 ```php
     protected function resolveDefaultValue(NovaRequest $request)

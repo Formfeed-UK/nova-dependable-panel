@@ -25,6 +25,10 @@ class InterceptDisplayFields {
      */
     public function handle(Request $request, Closure $next): Response {
 
+        if (array_key_exists("uses", $request->route()->action) && $request->route()->action['uses'] instanceof Closure) {
+            return $next($request);
+        }
+
         $routeController = $request->route()->getController();
         if (!$this->isDisplayRequest($routeController)) {
             return $next($request);

@@ -28,6 +28,10 @@ class InterceptDependentFields {
      */
     public function handle(Request $request, Closure $next): Response {
 
+        if (array_key_exists("uses", $request->route()->action) && $request->route()->action['uses'] instanceof Closure) {
+            return $next($request);
+        }
+
         if (!$this->isDependentFieldRequest($request)) {
             return $next($request);
         }

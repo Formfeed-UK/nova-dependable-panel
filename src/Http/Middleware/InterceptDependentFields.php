@@ -104,12 +104,12 @@ class InterceptDependentFields {
         $routeController = $request->route()->getController();
         switch (get_class($routeController)) {
             case UpdateFieldController::class:
-                return "updateFields";
+                return "updateFieldsWithinPanels";
             case UpdatePivotFieldController::class:
                 return "updatePivotFields";
             case CreationFieldController::class:
             case CreationFieldSyncController::class:
-                return "creationFields";
+                return "creationFieldsWithinPanels";
             case CreationPivotFieldController::class:
                 return "creationPivotFields";
         }

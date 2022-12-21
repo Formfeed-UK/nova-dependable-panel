@@ -282,6 +282,14 @@ class DependablePanel extends Field {
         }
     }
 
+    public function hasSubfields(): bool {
+        return true;
+    }
+
+    public function getSubfields(): FieldCollection {
+        return $this->fields;
+    }
+
     public function jsonSerialize(): array {
         $request = app(NovaRequest::class);
         return array_merge(parent::jsonSerialize(), [

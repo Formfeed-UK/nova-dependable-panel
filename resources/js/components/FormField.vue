@@ -141,8 +141,7 @@ export default {
 
   updated() {
     this.watchFields();
-    //this.setFieldValues();
-    this.removeEventWatchers();
+    this.setFieldValues();
     this.initGroupedDependsOn();
     if (this.currentField.singleRequest) {
         this.initialFieldVisibility();
@@ -179,7 +178,7 @@ export default {
       if (!isEmpty(this.watchedEvents)) {
         forIn(this.watchedEvents, (event, dependsOn) => {
           Nova.$off(
-            this.getFieldAttributeChangeEventName(event.dependsOn),
+            this.getFieldAttributeChangeEventName(dependsOn),
             event
           );
         });
@@ -211,7 +210,6 @@ export default {
 
     onSyncedField() {
       this.initGroupedDependsOn();
-      delete this.watchedFields["_changedField"];
       for (const field of this.currentField.fields) {
         if (this.fieldInstances().hasOwnProperty(field.attribute) && !isNil(this.fieldInstances()[field.attribute])) {
             let instance = this.fieldInstances()[field.attribute];
@@ -235,7 +233,6 @@ export default {
           this.watchedEvents[dependsOn] = (value) => {
             this.watchedFields[dependsOn] = value;
             this.dependentFieldDebouncer(() => {
-              this.watchedFields["_changedField"] = dependsOn;
               this.watchedFields[dependsOn] = value;
               this.syncField();
             });
@@ -250,12 +247,14 @@ export default {
 
     watchFields() {
       for (const field in this.fieldInstances()) {
+        let currField = this.fieldInstances()[field];
         this.$watch(
-          () => this.fieldInstances()[field]?.value,
+          () => currField?.value,
           (value) => {
             this.values[field] = value;
           }
         );
+        if (!isNil(currField)) currField.watchedFields["_viaField"] = this.currentField.dependentComponentKey;
       }
     },
 

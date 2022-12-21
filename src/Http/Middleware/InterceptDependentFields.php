@@ -4,6 +4,7 @@ namespace Formfeed\DependablePanel\Http\Middleware;
 
 use ArrayObject;
 use Closure;
+use Formfeed\DependablePanel\DependablePanel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +17,11 @@ use Laravel\Nova\Http\Controllers\CreationFieldSyncController;
 use Laravel\Nova\Http\Controllers\UpdatePivotFieldController;
 use Laravel\Nova\Http\Controllers\CreationPivotFieldController;
 use Laravel\Nova\Http\Requests\NovaRequest;
+
+use Formfeed\NovaFlexibleContent\Flexible as FormfeedFlexible;
+use Illuminate\Support\Collection;
+use Laravel\Nova\Fields\Field;
+use Whitecube\NovaFlexibleContent\Flexible as WhitecubeFlexible;
 
 class InterceptDependentFields {
 
@@ -32,26 +38,46 @@ class InterceptDependentFields {
             return $next($request);
         }
 
+        $novaRequest = NovaRequest::createFrom($request);
+
         if (!$this->isDependentFieldRequest($request)) {
             return $next($request);
         }
 
-        if (!$this->hasDependentPanelFields($request)) {
+        
+        if (!$this->resourceHasSubfields($novaRequest)) {
             return $next($request);
         }
 
-        $dependentPanel = $this->getDependentPanel($request);
-        $componentKey = $this->getFieldComponentKey($request);
-
         $response = $next($request);
+
         if ($response instanceof JsonResponse) {
             $content = $response->getOriginalContent();
             if ($content instanceof ArrayObject && $content->count() === 0) {
-                $response = response()->json(
-                    $this->getDependentPanelFields($request, $dependentPanel, $componentKey)
-                );
+                $field = $this->findField($novaRequest, $request->input("component"), $request->input("_viaField"));
+                if ($field instanceof Field) {
+                    $response = response()->json($field->syncDependsOn($novaRequest));
+                }
+                else {
+                    $response = response()->json();
+                }
             }
         }
+
+        // Ensure any flexible content fields within dependant panel are resolved
+        if (Str::contains($request->get("component"), "nova-dependable-panel")) {
+            $panel = $response->getOriginalContent();
+            if ($panel instanceof DependablePanel) {
+                foreach ($panel->fields as $field) {
+                    if ((class_exists(FormfeedFlexible::class) && $field instanceof FormfeedFlexible) || (class_exists(WhitecubeFlexible::class) && $field instanceof WhitecubeFlexible)) {
+                        $field->resolve($novaRequest->newResource(), $field->attribute);
+                        $field->value = ($field->value instanceof Collection && $field->value->count() > 0) ? $field->value : null;
+                    }
+                }
+                return response()->json($panel);
+            }
+        }
+
         return $response;
     }
 
@@ -62,42 +88,44 @@ class InterceptDependentFields {
         return (is_null($this->getFieldMethod($request))) ? false : true;
     }
 
-    protected function hasDependentPanelFields(Request $request) {
-        if (!$request->has("component")) {
-            return false;
+    protected function findField(NovaRequest $request, string $componentKey, string $viaField) {
+        $fields = $this->getResourceFields($request);
+        return $this->findNestedField($request, $fields, $componentKey, $viaField);
+    }
+
+    protected function findNestedField(NovaRequest $request, FieldCollection $fields, string $componentKey) {
+
+        if ($fields->count() === 0) {
+            return [];
         }
-        if (Str::contains($request->get("component"), "dependent_panel")) {
-            return true;
-        }
-        return false;
+
+        return $fields->first(fn ($field) => ($field->dependentComponentKey() === $componentKey)) ?? $this->findNestedField($request, $this->getSubfields($request, $fields), $componentKey);
     }
 
-    protected function getDependentPanel(Request $request) {
-        $parts = explode(".", $request->get("component"));
-        return $parts[1];
+    protected function getSubfields(NovaRequest $request, FieldCollection $fields) {
+        return rescue(function () use ($fields, $request) {
+            return $fields->filter(function ($field) use ($request) {
+                return $this->fieldHasSubfields($request, $field);
+            })->map(function ($field) use ($request) {
+                return $field->getSubfields($request);
+            })->flatten();
+        }, FieldCollection::make([]), false);
     }
 
-    protected function getFieldComponentKey(Request $request) {
-        $parts = explode(".", $request->get("component"));
-        return "{$parts[2]}.{$parts[3]}.{$parts[4]}";
+    protected function fieldHasSubfields(NovaRequest $request, Field $field): bool {
+        return method_exists($field, "getSubfields") && method_exists($field, "hasSubfields") && $field->hasSubfields($request);
     }
 
-    protected function getDependentPanelFields(Request $request, string $panel, string $componentKey) {
-        $request =  NovaRequest::createFrom($request);
+    protected function getResourceFields(NovaRequest $request): FieldCollection {
         $fieldMethod = $this->getFieldMethod($request);
-        $panel = $request->newResource()
-            ->$fieldMethod($request)
-            ->filter(function ($field) use ($panel) {
-                return $panel === $field->attribute;
-            })->first();
-        $fields = $panel?->fields ?? [];
-        $fields = (new FieldCollection($fields))
-            ->filter(function ($field) use ($componentKey, $request) {
-                return $request->query('field') === $field->attribute &&
-                    $componentKey === $field->dependentComponentKey();
-            })
-            ->each->syncDependsOn($request)->first();
-        return $fields;
+        return $request->newResource()
+            ->$fieldMethod($request);
+    }
+
+    protected function resourceHasSubfields(NovaRequest $request): bool {
+        return $this->getResourceFields($request)->contains(function ($field) {
+            return method_exists($field, "getSubfields") && method_exists($field, "hasSubfields");
+        });
     }
 
     protected function getFieldMethod(Request $request) {

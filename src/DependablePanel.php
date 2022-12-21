@@ -89,13 +89,31 @@ class DependablePanel extends Field {
             $rules = [];
             foreach ($this->fields as $field) {
                 $field->applyDependsOn($request);
-                $rules = array_merge($rules, [
-                    $field->attribute => [
-                        "attribute" => FlexibleAttribute::make($field->attribute, $request->group),
-                        "rules" => $field->getUpdateRules($request)
-                    ]
-                ]);
+                $fieldRules = $field->getUpdateRules($request);
+
+                // Parse nested Flexible Attributes for when panel is nested within another Flexible Layout
+                foreach ($fieldRules as $key => $rule) {
+                    if (is_array($rule) && is_a($rule['attribute'] ?? null, FlexibleAttribute::class)) {
+                        if (!(explode(".", $key)[0] === $field->attribute)) {
+                            continue;
+                        }
+                        $rules[$key] = $rule;
+                        unset($fieldRules[$key]);
+                    }
+                }
+
+                if (is_a($fieldRules['attribute'] ?? null, FlexibleAttribute::class)) {
+                    $rules = array_merge($rules, $fieldRules);
+                } else {
+                    $rules = array_merge($rules, [
+                        $field->attribute => [
+                            "attribute" => FlexibleAttribute::make($field->attribute, $request->group),
+                            "rules" => $fieldRules
+                        ]
+                    ]);
+                }
             }
+
             return $rules;
         }
         $rules = [$this->attribute => []];

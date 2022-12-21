@@ -168,10 +168,7 @@ class DependablePanel extends Field {
             $field->value = null;
         }
         parent::applyDependsOn($request);
-        $fieldDependencies = $this->getDependentsAttributes($request) ?? [];
-
         foreach ($this->fields as $field) {
-            $dependsOnArray = $field->jsonSerialize()["dependsOn"] ?? [];
             $field->applyDependsOn($request);
         }
 

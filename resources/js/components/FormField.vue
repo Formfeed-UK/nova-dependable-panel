@@ -141,7 +141,6 @@ export default {
 
   updated() {
     this.watchFields();
-    this.setFieldValues();
     this.initGroupedDependsOn();
     if (this.currentField.singleRequest) {
         this.initialFieldVisibility();

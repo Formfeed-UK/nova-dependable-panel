@@ -308,7 +308,6 @@ export default {
       let instances = this.fieldInstances();
       fields.forEach((field) => {
         field.panel = this.panel;
-        field.dependentComponentKey = `dependent_panel.${this.currentField.attribute}.${field.dependentComponentKey}`;
         if (this.isInFlexibleGroup) {
           field.validationKey = `${this.groupKey}__${field.validationKey}`;
           field.uniqueKey = `${this.groupKey}-${field.uniqueKey}`;

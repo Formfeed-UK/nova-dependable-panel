@@ -11,7 +11,8 @@
     "require": {
         "php": "^7.3|^8.0",
         "laravel/nova": "^4.0",
-        "nova-kit/nova-packages-tool":"^1.0"
+        "nova-kit/nova-packages-tool":"^1.0",
+        "formfeed-uk/nova-subfield-dependson": "^2.0.0"
     },
     "autoload": {
         "psr-4": {

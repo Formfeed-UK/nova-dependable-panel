@@ -19,6 +19,10 @@ use Laravel\Nova\Panel;
 use Laravel\Nova\ResourceTool;
 use Laravel\Nova\ResourceToolElement;
 
+use Formfeed\NovaFlexibleContent\Flexible as FormfeedFlexible;
+use Illuminate\Support\Collection;
+use Whitecube\NovaFlexibleContent\Flexible as WhitecubeFlexible;
+
 class DependablePanel extends Field {
     use SupportsDependentFields;
 
@@ -288,6 +292,17 @@ class DependablePanel extends Field {
 
     public function getSubfields(): FieldCollection {
         return $this->fields;
+    }
+
+    public function afterDependsOnSync(NovaRequest $request) : self {
+        $this->fields->each(function ($field) use ($request) {
+            if ((class_exists(FormfeedFlexible::class) && $field instanceof FormfeedFlexible) || (class_exists(WhitecubeFlexible::class) && $field instanceof WhitecubeFlexible)) {
+                $field->resolve($request->newResource(), $field->attribute);
+                $field->value = ($field->value instanceof Collection && $field->value->count() > 0) ? $field->value : null;
+            }
+        });
+
+        return $this;
     }
 
     public function jsonSerialize(): array {

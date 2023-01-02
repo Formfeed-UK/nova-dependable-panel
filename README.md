@@ -36,7 +36,7 @@ composer require formfeed-uk/nova-dependable-panel
 #### Hiding the entire Panel based on a dependsOn function
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {
@@ -62,7 +62,7 @@ composer require formfeed-uk/nova-dependable-panel
 All of the Text Fields dependsOn requests will be sent as one request using the `singleRequest` method. This is useful for both reducing the number of requests on large forms and for more consistent UX as the fields are changed at the same time. 
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {
@@ -110,7 +110,7 @@ You can also batch dependsOn functionality for all fields within your Panel usin
 Note that the first parameter should be of type `Field` to ensure that the function can apply to all fields within your panel, regardless of type. 
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {
@@ -146,7 +146,7 @@ The fields in Nova Dependable Panel can be part of any other panel (default), or
 This panel will use the first argument to DependablePanel as its panel name.
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {
@@ -169,7 +169,7 @@ This panel will use the first argument to DependablePanel as its panel name.
 Rather than hiding/showing fields as a result of dependsOn, you can change the fields themselves using the `fields` method. Note that this functionality requires `singleRequest` to operate properly. 
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {
@@ -200,7 +200,7 @@ Rather than hiding/showing fields as a result of dependsOn, you can change the f
 In the example below if the "Readonly" checkbox is checked, and then the select option is changed to Option 1, in order for these fields to be readonly when mounted, you can see "readonly" needs to be included in the panels `dependsOn` function.
 
 ```php
-    use FormFeed\NovaDependablePanel\DependablePanel;
+    use FormFeed\DependablePanel\DependablePanel;
 
     public function fields(NovaRequest $request)
     {

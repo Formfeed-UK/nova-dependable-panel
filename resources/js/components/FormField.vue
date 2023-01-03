@@ -253,7 +253,6 @@ export default {
             this.values[field] = value;
           }
         );
-        if (!isNil(currField)) currField.watchedFields["_viaField"] = this.currentField.dependentComponentKey;
       }
     },
 

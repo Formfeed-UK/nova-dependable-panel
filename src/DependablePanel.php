@@ -230,7 +230,7 @@ class DependablePanel extends Field {
 
     public function applyToFields($mixin) {
         $request = app(NovaRequest::class);
-        $attributes = $this->getDependentsAttributes($request);
+        $attributes = $this->getDependentsAttributes($request) ?? [];
         $formData = FormData::onlyFrom($request, $attributes);
         foreach ($this->fields as $field) {
             $mixin($field, $request, $formData);

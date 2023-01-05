@@ -308,7 +308,7 @@ class DependablePanel extends Field {
     public function jsonSerialize(): array {
         $request = app(NovaRequest::class);
         return array_merge(parent::jsonSerialize(), [
-            'fields' => $this->getFields($request)->jsonSerialize(),
+            'fields' => array_values($this->getFields($request)->jsonSerialize()),
             'singleRequest' => $this->singleRequest,
         ]);
     }

@@ -238,7 +238,32 @@ class DependablePanel extends Field {
         return $this;
     }
 
+    /*
     public function fill(NovaRequest $request, $model) {
+        $fields = $this->fields
+            ->withoutReadonly($request)
+            ->withoutUnfillable();
+        foreach ($fields as $field) {
+            $field->fillInto($request, $model, $field->attribute);
+        }
+    }*/
+
+    /**
+     * Specify a callback that should be used to hydrate the model attribute for the field.
+     *
+     * @param  callable(\Laravel\Nova\Http\Requests\NovaRequest, object, string, string, array):mixed  $fillCallback
+     * @return $this
+     */
+    public function fillUsing($fillCallback) {
+        $this->fillCallback = $fillCallback;
+        return $this;
+    }
+
+    protected function fillAttribute(NovaRequest $request, $requestAttribute, $model, $attribute) {
+        if (isset($this->fillCallback)) {
+            return call_user_func($this->fillCallback, $request, $model, $attribute, $requestAttribute, $this->fields);
+        }
+
         $fields = $this->fields
             ->withoutReadonly($request)
             ->withoutUnfillable();
@@ -294,7 +319,7 @@ class DependablePanel extends Field {
         return $this->fields;
     }
 
-    public function afterDependsOnSync(NovaRequest $request) : self {
+    public function afterDependsOnSync(NovaRequest $request): self {
         $this->fields->each(function ($field) use ($request) {
             if ((class_exists(FormfeedFlexible::class) && $field instanceof FormfeedFlexible) || (class_exists(WhitecubeFlexible::class) && $field instanceof WhitecubeFlexible)) {
                 $field->resolve($request->newResource(), $field->attribute);

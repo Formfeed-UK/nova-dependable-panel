@@ -6,7 +6,7 @@ Dusk Test Repo: https://github.com/Formfeed-UK/nova-dependable-panel-tests
 
 ## Requirements
 
-- `php: ^7.3|^8.0`
+- `php: >=8.2`
 - `laravel/nova: ^4.0`
 
 ## Features

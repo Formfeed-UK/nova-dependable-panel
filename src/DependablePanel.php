@@ -242,9 +242,18 @@ class DependablePanel extends Field {
         $fields = $this->fields
             ->withoutReadonly($request)
             ->withoutUnfillable();
+
+        $callbacks = [];
+
         foreach ($fields as $field) {
-            $field->fillInto($request, $model, $field->attribute);
+            $callback = $field->fillInto($request, $model, $field->attribute);
+
+            if (is_callable($callback)) {
+                $callbacks[] = $callback;
+            }
         }
+
+        return fn () => collect($callbacks)->each->__invoke();
     }
 
     public function getFields(NovaRequest $request) {

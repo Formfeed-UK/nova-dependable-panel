@@ -239,7 +239,7 @@ class DependablePanel extends Field {
     }
 
     public function fill(NovaRequest $request, $model) {
-        $fields = $this->fields
+        $fields = $this->getFields($request)
             ->withoutReadonly($request)
             ->withoutUnfillable();
         foreach ($fields as $field) {
